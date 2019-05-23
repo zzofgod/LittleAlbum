@@ -1,0 +1,109 @@
+<% include ./public/header.ejs %>
+<style type="text/css">
+    .row h4 {
+        text-align: center;
+    }
+
+    #menu {
+        width: 0;
+        /*设置为0 隐藏自定义菜单*/
+        overflow: hidden;
+        /*隐藏溢出的元素*/
+        box-shadow: 0 1px 1px #888, 1px 0 1px #ccc;
+        position: absolute;
+        background: #fff;
+        /*自定义菜单相对与body元素进行定位*/
+    }
+
+    .menu {
+        width: 130px;
+        height: 40px;
+        line-height: 40px;
+        padding: 0 10px;
+        text-align: center;
+        padding: 0 10px;
+    }
+
+    .item {
+        margin-bottom: 50px
+    }
+
+    #input {
+        width: 100%
+    }
+</style>
+
+<div class="container">
+    <div class="row" id="list">
+        <% for(var i = 0 ; i < albums.length ; i++){ %>
+        <div class="col-xs-6 col-md-3 item">
+            <a href="<%= albums[i] %>" class="thumbnail">
+                <img src="images/wjj.jpg" alt="...">
+            </a>
+            <h4><%= albums[i] %></h4>
+        </div>
+        <% } %>
+    </div>
+    <div id="menu">
+        <div class="createdir menu">新建相册</div>
+        <!-- <div class="menu">功能2</div>
+        <div class="menu">功能3</div>
+        <div class="menu">功能4</div>
+        <div class="menu">功能5</div> -->
+    </div>
+    <div style="display: none">
+        <div class="col-xs-6 col-md-3 item" id="node">
+            <a class="thumbnail">
+                <img src="images/wjj.jpg" alt="...">
+            </a>
+            <div id="text-node"><input type="text" name="dirname" id="input"></div>
+        </div>
+    </div>
+
+</div>
+<script>
+    window.onload = function () {
+        window.oncontextmenu = function (e) {
+            document.querySelector('#menu').style.height = 40 + "px";
+            //取消默认的浏览器自带右键 很重要！！
+            e.preventDefault();
+            //获取我们自定义的右键菜单
+            var menu = document.querySelector("#menu");
+            //根据事件对象中鼠标点击的位置，进行定位
+            menu.style.left = e.clientX + 'px';
+            menu.style.top = e.clientY + 'px';
+            //改变自定义菜单的宽，让它显示出来
+            menu.style.width = '125px';
+        }
+        //关闭右键菜单，很简单
+        window.onclick = function (e) {
+            document.querySelector('#menu').style.height = 0;
+        }
+        var node = document.querySelector("#node")
+        var menus = document.querySelector("#menu").children
+        for (let i = 0; i < menus.length; i++) {
+            menus[i].addEventListener("click", function () {
+                if (i == 0) {
+                    document.querySelector("#list").appendChild(node)
+                    var input = document.querySelector("#input")
+                    input.focus()
+                    input.addEventListener("keydown", function (e) {
+                        if (e.keyCode == 13) {
+                            mkdir(this.value)
+                        }
+                    })
+                }
+            })
+        }
+    }
+
+    function mkdir(value) {
+        $.post('/createdir', { dirname: $("#input").val() }, function () {
+            window.location.href = '/'
+        })
+        document.querySelector("#text-node").innerHTML = "<h4>" + value + "<h4>"
+    }
+</script>
+</body>
+
+</html>
