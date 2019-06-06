@@ -6,11 +6,6 @@ var sd = require("silly-datetime");
 
 //首页
 exports.showIndex = function (req, res, next) {
-    //错误的：传统思维，不是node的思维：
-    //res.render("index",{
-    //    "albums" : file.getAllAlbums()
-    //});
-
     //这就是Node.js的编程思维，就是所有的东西，都是异步的
     //所以，内层函数，不是return回来东西，而是调用高层函数提供的
     //回调函数。把数据当做回调函数的参数来使用。
@@ -57,9 +52,7 @@ exports.showUp = function (req, res) {
 //上传表单
 exports.doPost = function (req, res) {
     var form = new formidable.IncomingForm();
-
     form.uploadDir = path.normalize(__dirname + "/../tempup/");
-
     form.parse(req, function (err, fields, files, next) {
         //改名
         if (err) {
@@ -69,7 +62,7 @@ exports.doPost = function (req, res) {
         //判断文件尺寸
         var size = parseInt(files.tupian.size);
         if (size > 2000000000) {
-            res.send("图片尺寸应该小于1M");
+            res.send("图片尺寸应该小于10M");
             //删除图片
             fs.unlink(files.tupian.path);
             return;
@@ -87,7 +80,7 @@ exports.doPost = function (req, res) {
                 res.send("改名失败");
                 return;
             }
-            res.redirect("/");
+            res.redirect('/')
         });
     });
     return;
@@ -99,8 +92,23 @@ exports.createDir = (req, res) => {
 }
 
 exports.doPostdir = (req, res) => {
-    file.createdir(req.body, (err) => {
+    file.createdir(req.body, (err, data) => {
         if (err) throw err
-        res.redirect("/")
+        res.send(data)
+    })
+}
+
+//删除文件夹
+exports.removedir = (req, res) => {
+    file.removedir(req.body, (err) => {
+        if (err) throw err
+        res.send({ "code": 0 })
+    })
+}
+
+exports.renamedir = (req, res) => {
+    file.renamedir(req.body, (err, data) => {
+        if (err) throw err
+        res.send(data)
     })
 }

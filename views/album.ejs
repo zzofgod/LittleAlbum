@@ -1,7 +1,17 @@
-<% include ./public/header.ejs %>
+﻿<% include ./public/header.ejs %>
 <style type="text/css">
     .row h4 {
         text-align: center;
+    }
+
+    .thumbnail {
+        width: 100%;
+        height: 160px;
+    }
+
+    .img {
+        width: 100%;
+        height: 100% !important;
     }
 </style>
 <div class="container">
@@ -12,9 +22,9 @@
 
     <div class="row">
         <% for(var i = 0 ; i < images.length ; i++){ %>
-        <div class="col-xs-6 col-md-3">
-            <a href="/<%=albumname%>/<%=images[i]%>" class="thumbnail">
-                <img src="<%=images[i]%>" alt="...">
+        <div class="col-xs-12 col-md-3 col-sm-6">
+            <a href="/<%=albumname%>/<%=images[i]%>" title="<%=images[i]%>" class="thumbnail">
+                <img src="<%=images[i]%>" title="<%=images[i]%>" alt="图片加载失败" width="250" height="160" class="img">
             </a>
             <h4> </h4>
         </div>

@@ -1,15 +1,26 @@
 <% include ./public/header.ejs %>
+
 <div class="container">
     <div class="row">
-        <form id="form" style="width:40%;" method="post" action="">
+        <form style="width:40%;" method="post" action="">
             <label for="wenjianjia">文件文件夹名称：</label>
             <div class="form-group">
-                <input type="text" name="dirname">
+                <input type="text" name="dirname" id="dirname">
             </div>
-            <button type="submit" id="submit" class="btn btn-success">创建</button>
+            <button type="button" id="submit" class="btn btn-success">创建</button>
         </form>
     </div>
 </div>
+<script>
+    $("#submit").click(function () {
+        if ($("#dirname").val() == "") {
+            alert("相册名不能为空")
+            return false
+        } else {
+            $("form").submit()
+        }
+    })
+</script>
 </body>
 
 </html>

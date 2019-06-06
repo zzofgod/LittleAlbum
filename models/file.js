@@ -1,5 +1,6 @@
 var fs = require("fs");
 var wenjianjia = []
+const path = require("path")
 //这个函数的callback中含有两个参数，一个是err
 //另一个是存放所有文件夹名字的array。
 exports.getAllAlbums = function (callback) {
@@ -39,7 +40,6 @@ exports.getAllImagesByAlbumName = function (albumName, callback) {
         (function iterator(i) {
             if (i == files.length) {
                 //遍历结束
-                console.log(allImages);
                 callback(null, allImages);
                 return;
             }
@@ -60,17 +60,73 @@ exports.getAllImagesByAlbumName = function (albumName, callback) {
 exports.createdir = (data, callback) => {
     fs.readdir("./uploads", (err, files) => {
         if (err) callback(err)
-        console.log(files)
         const dir = files.find((value) => {
             return value == data.dirname
         })
         if (dir === undefined) {
             fs.mkdir("./uploads/" + data.dirname, (err) => {
                 if (err) callback(err)
+                callback(null, null)
+            })
+        } else {
+            callback(null, { "code": 0 })
+        }
+    })
+}
+
+
+
+exports.removedir = (data, callback) => {
+    let dir = data.dirname
+    let pathName = path.join(__dirname, `../uploads/${dir}`)
+    fs.readdir(pathName, (err, files) => {
+        console.log(files.length)
+        if (err) { callback(err); }
+        if (files.length == 0) {
+            fs.rmdir(pathName, (err) => {
+                if (err) callback(err);
                 callback(null)
             })
         } else {
-            callback(null)
+            var length = files.length
+            for (let i = 0; i < length; i++) {
+                fs.unlink(path.join(pathName, files[i]), (err) => {
+                    if (err) { callback(err) };
+                    if (i == files.length - 1) {
+                        fs.rmdir(pathName, (err) => {
+                            if (err) { callback(err) };
+                            callback(null)
+                        })
+                    }
+                })
+            }
+
+        }
+
+    })
+}
+
+
+
+exports.renamedir = (data, callback) => {
+    let oldpath = path.join(__dirname, `../uploads/${data.oldname}`)
+    let newpath = path.join(__dirname, `../uploads/${data.newname}`)
+    fs.readdir("./uploads", (err, files) => {
+
+        if (err) callback(err)
+        const dir = files.find((value) => {
+            return value == data.newname
+        })
+
+        if (dir === undefined) {
+            fs.rename(oldpath, newpath, (err) => {
+                if (err) callback(err)
+                callback(null, null)
+            })
+        } else {
+            callback(null, { "code": 0 })
         }
     })
+
+
 }

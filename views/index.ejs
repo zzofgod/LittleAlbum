@@ -21,24 +21,32 @@
         line-height: 40px;
         padding: 0 10px;
         text-align: center;
-        padding: 0 10px;
+        color: #333;
+        cursor: pointer;
+
+    }
+
+    .menu:hover {
+        background: rgb(0, 80, 252);
+        color: white
     }
 
     .item {
-        margin-bottom: 50px
+        margin-bottom: 50px;
+        overflow: hidden;
+        height: 260px;
     }
 
     #input {
         width: 100%
     }
 </style>
-
 <div class="container">
     <div class="row" id="list">
         <% for(var i = 0 ; i < albums.length ; i++){ %>
         <div class="col-xs-6 col-md-3 item">
             <a href="<%= albums[i] %>" class="thumbnail">
-                <img src="images/wjj.jpg" alt="...">
+                <img src="images/wjj.jpg" alt="图片加载失败">
             </a>
             <h4><%= albums[i] %></h4>
         </div>
@@ -46,13 +54,11 @@
     </div>
     <div id="menu">
         <div class="createdir menu">新建相册</div>
-        <!-- <div class="menu">功能2</div>
-        <div class="menu">功能3</div>
-        <div class="menu">功能4</div>
-        <div class="menu">功能5</div> -->
+        <div class="createdir menu">重命名</div>
+        <div class="createdir menu">删除相册</div>
     </div>
     <div style="display: none">
-        <div class="col-xs-6 col-md-3 item" id="node">
+        <div class="col-xs-6 col-md-3 item node">
             <a class="thumbnail">
                 <img src="images/wjj.jpg" alt="...">
             </a>
@@ -63,8 +69,32 @@
 </div>
 <script>
     window.onload = function () {
-        window.oncontextmenu = function (e) {
-            document.querySelector('#menu').style.height = 40 + "px";
+        //dom节点
+        var oMenu = document.querySelector('#menu'),
+            List = document.querySelector("#list"),
+            Lists = List.children,
+            menus = document.querySelector("#menu").children,
+            menuLength = menus.length,
+            listLength = Lists.length,
+            node = document.querySelector(".node")
+
+        //全局文件夹名称
+        var dirname = "";
+        for (i = 0; i < listLength; i++) {
+            Lists[i].addEventListener("mouseenter", function (e) {
+                dirname = this.children[1].innerHTML;
+                /*for (j = 0; j < menuLength; j++) {
+                    menus[j].addEventListener("click", function () {
+                        if (j == 3) {
+                            removeDir(that.children[1].innerHTML)
+                        }
+                    }, false)
+                }*/
+            }, false)
+        }
+        //鼠标右键菜单
+        function showMenu(e) {
+            oMenu.style.height = 120 + "px";
             //取消默认的浏览器自带右键 很重要！！
             e.preventDefault();
             //获取我们自定义的右键菜单
@@ -75,13 +105,18 @@
             //改变自定义菜单的宽，让它显示出来
             menu.style.width = '125px';
         }
-        //关闭右键菜单，很简单
-        window.onclick = function (e) {
-            document.querySelector('#menu').style.height = 0;
+
+        window.oncontextmenu = function (e) {
+            showMenu(e)
         }
-        var node = document.querySelector("#node")
-        var menus = document.querySelector("#menu").children
-        for (let i = 0; i < menus.length; i++) {
+
+        //关闭右键菜单
+        window.onclick = function (e) {
+            oMenu.style.height = 0;
+        }
+
+        //右键菜单点击逻辑处理
+        for (let i = 0; i < menuLength; i++) {
             menus[i].addEventListener("click", function () {
                 if (i == 0) {
                     document.querySelector("#list").appendChild(node)
@@ -89,19 +124,89 @@
                     input.focus()
                     input.addEventListener("keydown", function (e) {
                         if (e.keyCode == 13) {
+                            input.blur()
+                        }
+                    })
+                    input.addEventListener("blur", function () {
+                        if (this.value == "") {
+                            document.querySelector("#list").removeChild(node)
+                        } else {
                             mkdir(this.value)
                         }
                     })
+                }
+                else if (i == 1) {
+                    for (var j = 0; j < listLength; j++) {
+                        if (Lists[j].children[1].innerHTML == dirname) {
+                            let oldname = Lists[j].children[1].innerHTML
+                            Lists[j].children[1].innerHTML = "<input type='text' id='new' value=" + dirname + "  />"
+                            document.querySelector("#new").focus()
+                            document.querySelector("#new").select()
+                            document.querySelector("#new").addEventListener("keydown", function (e) {
+                                if (e.keyCode == 13) {
+                                    this.blur()
+                                }
+                            })
+                            document.querySelector("#new").addEventListener("blur", function () {
+                                renamedir(oldname, this.value)
+                            })
+                        }
+                    }
+                } else if (i == 2) {
+                    if (dirname == "") {
+                        alert("您没有要删除的相册！")
+                        return false;
+                    }
+                    show_confirm(dirname)
                 }
             })
         }
     }
 
     function mkdir(value) {
-        $.post('/createdir', { dirname: $("#input").val() }, function () {
-            window.location.href = '/'
+        $.post('/createdir', { dirname: value }, function (data) {
+            if (data.code == 0) {
+                alert("相册已存在，创建相册失败！")
+                window.location.href = '/'
+            } else {
+                window.location.href = '/'
+            }
         })
         document.querySelector("#text-node").innerHTML = "<h4>" + value + "<h4>"
+    }
+
+    function renamedir(oldName, newName) {
+        console.log(typeof oldName)
+        if (oldName == "") {
+            alert("请选择您要重命名的相册")
+            return false;
+        }
+        $.post('/renamedir', { "oldname": oldName, "newname": newName }, function (data) {
+            if (data.code == 0) {
+                alert("相册已存在，重命名失败！")
+                window.location.href = '/'
+            } else {
+                window.location.href = '/'
+            }
+        })
+    }
+
+    function removeDir(value) {
+        /*$.post('/removedir', { dirname: value }, function (data) {
+            if (data.code == 0) {
+                window.location.href = '/'
+            }
+        })*/
+        alert("您没有权限删除！！！")
+    }
+
+    function show_confirm(dirname) {
+        var r = confirm("确定删除？");
+        if (r == true) {
+            removeDir(dirname)
+        } else {
+
+        }
     }
 </script>
 </body>

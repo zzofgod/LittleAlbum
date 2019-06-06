@@ -23,13 +23,15 @@ app.get("/up", router.showUp);
 app.post("/up", router.doPost);
 app.get("/createdir", router.createDir);
 app.post("/createdir", router.doPostdir);
+app.post("/removedir", router.removedir);
+app.post("/renamedir", router.renamedir)
 
 //404
 app.use(function (req, res) {
-    res.render("err");
+  res.render("err");
 });
 
-app.listen(3100,function(err){
-  if(err) throw err
- console.log("running in 3100")
+app.listen(3100, function (err) {
+  if (err) throw err
+  console.log("running in 3100")
 });
