@@ -25,6 +25,7 @@ app.get("/createdir", router.createDir);
 app.post("/createdir", router.doPostdir);
 app.post("/removedir", router.removedir);
 app.post("/renamedir", router.renamedir)
+app.post("/removefile", router.removefile)
 
 //404
 app.use(function (req, res) {

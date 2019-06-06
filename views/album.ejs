@@ -1,38 +1,249 @@
-﻿<% include ./public/header.ejs %>
-<style type="text/css">
+<% include ./public/header.ejs %>
+<style>
     .row h4 {
         text-align: center;
     }
 
-    .thumbnail {
+    #imgbox {
         width: 100%;
-        height: 160px;
+        display: none;
+        position: absolute;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        right: 0;
+        background-color: rgba(0, 0, 0, .8);
+        text-align: center;
+        padding: 100px 0;
     }
 
-    .img {
-        width: 100%;
-        height: 100% !important;
+    .close {
+        position: absolute;
+        right: 50px;
+        top: 50px;
+        color: #ffffff !important;
+    }
+
+    #menu {
+        width: 0;
+        /*设置为0 隐藏自定义菜单*/
+        overflow: hidden;
+        /*隐藏溢出的元素*/
+        box-shadow: 0 1px 1px #888, 1px 0 1px #ccc;
+        position: absolute;
+        background: #fff;
+        /*自定义菜单相对与body元素进行定位*/
+    }
+
+    .menu {
+        width: 130px;
+        height: 40px;
+        line-height: 40px;
+        padding: 0 10px;
+        text-align: center;
+        color: #333;
+        cursor: pointer;
+
+    }
+
+    .menu:hover {
+        background: rgb(0, 80, 252);
+        color: white
+    }
+
+    .item {
+        margin-bottom: 50px;
+        overflow: hidden;
+        height: 260px;
+    }
+
+    #upload {
+        display: none;
+    }
+
+    .weather {
+        float: left;
+        margin: 20px 0;
+    }
+
+    .upload {
+        float: right;
+        width: 500px;
+        line-height: 80px;
     }
 </style>
+<div class="container">
+    <div class="weather"><iframe width="200" scrolling="no" height="55" frameborder="0" allowtransparency="true"
+            src="http://i.tianqi.com/index.php?c=code&id=35&icon=1&num=3"></iframe></div>
+    <div class="upload">
+        <input type="button" class="btn btn-sm add btn-info pull-right" value="添加图片"
+            style="display: block;margin-top: 26px;" />
+        <div id="upload">
+            <form id="form" style="width:100%;" method="post" action="/up" enctype="multipart/form-data">
+                <input type="hidden" name="wenjianjia" value="<%=albumname%>" />
+                <div class="form-group">
+                    <input type="file" style="display: none" class="form-control" accept="image/jpeg" id="image"
+                        name="tupian">
+                    <div class="input-append">
+                        <input id="showname" class="input-large" type="text" disabled style="height:30px;width:50%">
+                        <a class="btn btn-primary btn-sm" onclick="makeThisfile()" id="browse">选择文件</a>
+                        <button type="submit" id="submit" class="btn btn-info btn-sm">上传</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 <div class="container">
     <ol class="breadcrumb navbar-inverse">
         <li><a href="/">全部相册</a></li>
         <li class="active"><%=albumname%></li>
     </ol>
-
-    <div class="row">
+    <div class="row" id="box">
         <% for(var i = 0 ; i < images.length ; i++){ %>
-        <div class="col-xs-12 col-md-3 col-sm-6">
-            <a href="/<%=albumname%>/<%=images[i]%>" title="<%=images[i]%>" class="thumbnail">
-                <img src="<%=images[i]%>" title="<%=images[i]%>" alt="图片加载失败" width="250" height="160" class="img">
+        <div class="col-xs-6 col-md-3" id="images">
+            <a href="#" title="<%=images[i]%>" class="thumbnail">
+                <img src="<%=images[i]%>" alt="...">
             </a>
             <h4> </h4>
         </div>
         <%}%>
-        </div>
     </div>
-
+    <div id="imgbox">
+        <div class="showimg"><img src="" width="60%"></div>
+        <div class="close"><i class="glyphicon glyphicon-remove-circle"></i></div>
+    </div>
+    <div id="menu">
+        <div class="createdir menu">添加图片</div>
+        <div class="createdir menu">重命名</div>
+        <div class="createdir menu">删除图片</div>
+    </div>
+    </div>
     <script src="/js/jquery-1.11.3.min.js"></script>
     <script src="/js/bootstrap.min.js"></script>
+    <script>
+        //触发隐藏的file表单
+        function makeThisfile() {
+            $('#image').click();
+        }
+
+        //file表单选中文件时,让file表单的val展示到showname这个展示框
+        $('#image').change(function () {
+            $('#showname').val($(this).val())
+        })
+
+        //提交表单验证
+        $("#form").submit(function (e) {
+            if ($("#wenjianjia").val() === null) {
+                e.preventDefault()
+                alert("请选择相册！")
+            }
+            else if ($("#image").val() == "") {
+                e.preventDefault()
+                alert("图片不能为空！")
+            }
+        })
+        //点击图片展示
+        window.onload = function () {
+            var box = document.querySelector("#box"),
+                images = box.querySelectorAll(".thumbnail"),
+                imgbox = document.querySelector("#imgbox"),
+                showimg = document.querySelector(".showimg"),
+                close = document.querySelector(".close"),
+                imgLength = images.length
+            for (var i = 0; i < imgLength; i++) {
+                images[i].onclick = function (e) {
+                    imgbox.style.display = "block";
+                    showimg.children[0].src = this.children[0].src
+                }
+            }
+            close.onclick = function () {
+                imgbox.style.display = "none";
+            }
+
+        }
+        //鼠标右键菜单函数
+        function showMenu(e) {
+            oMenu.style.height = 120 + "px";
+            //取消默认的浏览器自带右键 很重要！！
+            e.preventDefault();
+            //获取我们自定义的右键菜单
+            var menu = document.querySelector("#menu");
+            //根据事件对象中鼠标点击的位置，进行定位
+            menu.style.left = e.clientX + 'px';
+            menu.style.top = e.clientY + 'px';
+            //改变自定义菜单的宽，让它显示出来
+            menu.style.width = '125px';
+        }
+
+        //获取dom元素
+        var oMenu = document.querySelector('#menu'),
+            oList = document.querySelector('#box').children,
+            listLength = oList.length,
+            menuList = oMenu.children,
+            menuLength = menuList.length,
+            filedir = document.querySelector('.active').innerHTML
+        var filename = "";
+        for (i = 0; i < listLength; i++) {
+            oList[i].addEventListener("mouseenter", function (e) {
+                filename = this.children[0].title
+            }, false)
+        }
+        //右键菜单点击逻辑处理
+        for (let i = 0; i < menuLength; i++) {
+            menuList[i].addEventListener("click", function () {
+                if (i == 0) {
+                    showUpLoad.call(document.querySelector(".add"))
+                }
+                else if (i == 1) {
+                    alert("功能研发中！！！")
+                } else if (i == 2) {
+                    if (filename == "") {
+                        alert("您没有选择要删除的图片！")
+                        return false;
+                    }
+                    show_confirm(filename, filedir)
+                }
+            })
+        }
+        //右键显示菜单
+        window.oncontextmenu = function (e) {
+            showMenu(e)
+        }
+        //关闭右键菜单
+        window.onclick = function (e) {
+            oMenu.style.height = 0;
+        }
+        //确认删除
+        function show_confirm(filename, filedir) {
+            var r = confirm("确定删除？");
+            if (r == true) {
+                removeFile(filename, filedir)
+            } else {
+                return false;
+            }
+        }
+        //删除图片ajax请求
+        function removeFile(name, dir) {
+            $.post('/removefile', { filename: name, filedir: dir }, function (data) {
+                if (data.code == 0) {
+                    window.location.reload()
+                }
+            })
+        }
+        var upload = document.querySelector("#upload")
+        document.querySelector(".add").onclick = showUpLoad
+
+        function showUpLoad() {
+            if (this.value == "添加图片") {
+                upload.style.display = "block";
+                this.value = "取消添加"
+            }
+            else {
+                upload.style.display = "none";
+                this.value = "添加图片"
+            }
+        }
+    </script>
 </body>
 </html>

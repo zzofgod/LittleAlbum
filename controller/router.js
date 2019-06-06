@@ -77,10 +77,10 @@ exports.doPost = function (req, res) {
         var newpath = path.normalize(__dirname + "/../uploads/" + wenjianjia + "/" + ttt + ran + extname);
         fs.rename(oldpath, newpath, function (err) {
             if (err) {
-                res.send("改名失败");
+                res.send("上传失败");
                 return;
             }
-            res.redirect('/')
+            res.redirect(`/${wenjianjia}`)
         });
     });
     return;
@@ -110,5 +110,14 @@ exports.renamedir = (req, res) => {
     file.renamedir(req.body, (err, data) => {
         if (err) throw err
         res.send(data)
+    })
+
+}
+
+
+exports.removefile = (req, res) => {
+    file.removefile(req.body, (err, data) => {
+        if (err) throw err
+        res.send({ "code": 0 })
     })
 }

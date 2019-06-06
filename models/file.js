@@ -127,6 +127,13 @@ exports.renamedir = (data, callback) => {
             callback(null, { "code": 0 })
         }
     })
+}
 
-
+exports.removefile = (data, callback) => {
+    let filename = data.filename
+    let filedir = data.filedir
+    fs.unlink(path.join(__dirname, '../uploads/' + filedir + '/' + filename), (err) => {
+        if (err) callback(err)
+        callback(null)
+    })
 }
